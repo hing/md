@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Online Markdown Editor</title>
+    <link rel="stylesheet" href="editor/Medium.css">
+    <link rel="stylesheet" href="editor/FontAwesome/css/FontAwesome.min.css">
+    <style>
+    body,html {font:16px/22px georgia,serif; color:#444;}
+    body {margin:40px auto 0; width:800px;}
+    .editable {outline:#999 groove thin; padding:10px;}
+    #header,#footer {text-align:center; margin:30px 0px;}
+    </style>
+</head>
+<body>
+    <h1 id='header'>Online Markdown Editor</h1>
+    <div class="editable" id="editor" contenteditable="true" onkeyup="saveContent(this.id)">
+<h2>Meet md</h2>
+<p><b>md</b> is a truly static site generator. All the processing of your files happens on the requesting client's computer as needed. The whole system is written in client-side JavaScript. This means:</p>
+<ul><li>minimal bandwidth requirements</li><li>better search engine indexing</li><li>awesome screen reader support</li><li><i>zero</i> security vulnerabilities</li><li>and more!</li></ul>
+<p>However, the neatest thing about <b>md</b> is that you don't have to configure, setup, or install <i>anything</i> Simply download the files, create your articles, and upload everything to your server!</p>
+<p>done.</p>
+<h2>What About Markup?</h2>
+<p>Like most systems, you can compose pages in <b>md</b> using the text-to-HTML format "<a href="http://daringfireball.net/projects/markdown/">markdown</a>". You can also use plain HTML if you want.</p>
+<h2>Getting Started</h2>
+<ol start="1"><li>Download <a href="https://hing.me/md/js/md.js">md.js</a></li><li>Make your <b>filename.html</b> file and write in Markdown</li><li>Paste the following code at the bottom of each page:</li></ol>
+<p><span style="white-space:pre">	</span>&lt;script src="md.js"&gt;&lt;/script&gt;</p>
+<p>Once you have created your pages then simply upload the system to your website and enjoy.</p>
+    </div>
+
+   <div id='footer'>
+       <input type="button" value="插入 md.js 脚本" onclick="document.getElementById('editor').focus(); pasteHtmlAtCaret(getMdjs);">
+       <input type="button" value="下载 MD 文件" id="saveMD">
+       <input type="button" value="下载 HTML 文件" id="saveHTML">
+       <input type="button" value="重置编辑内容" onclick="window.location.href('#')" class="clear">
+    </div>
+    <div style="display:none"><textarea id="input"></textarea><textarea id="output"></textarea></div>
+
+<script src="editor/jQuery.js"></script>
+<script src="editor/Medium.js"></script>
+<script>
+    //var editor = new MediumEditor('.editable');
+    var M = Medium( document.getElementById('editor'))
+    M.change(function(html) {
+        //console.log(html)
+    })
+</script>
+
+<!-- ↓↓↓ MarkdownIME.js ↓↓↓ -->
+<script src="editor/MarkdownIME.js"></script>
+<script>
+var editor = document.getElementById('editor');
+MarkdownIME.Enhance(editor);
+</script>
+<!-- ↑↑↑ MarkdownIME.js ↑↑↑ -->
+
+<!-- ↓↓↓ LocalStorage.js ↓↓↓ -->
+<script>
+function getContent(){
+    if(localStorage.getItem('storageContent')){
+        var content = localStorage.getItem('storageContent');
+    } else {
+        var content = document.getElementById("editor").innerHTML;
+    }
+    document.getElementById('editor').innerHTML= content;
+}
+function saveContent(id) {
+    var content = document.querySelector('#editor').innerHTML;
+    localStorage.setItem('storageContent', content);
+}
+document.querySelector('.clear').addEventListener('click', () => {
+    clear: localStorage.clear();
+    return false;
+});
+getContent();
+</script>
+<!-- ↑↑↑ LocalStorage.js ↑↑↑ -->
+
+<!-- ↓↓↓ UnMarked.js ↓↓↓ -->
+  <script src="editor/UnMarked.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      var input = document.querySelector('#input');
+      input.value = document.querySelector('#editor').innerHTML;
+      function updateOutput() {
+        document.querySelector('#output').value = unmarked(input.value);
+      }
+      updateOutput();
+      input.addEventListener('input', updateOutput);
+    });
+  </script>
+<!-- ↑↑↑ UnMarked.js ↑↑↑ -->
+
+<!-- ↓↓↓ SaveAs.js ↓↓↓ -->
+<script>
+var downloadHTML = document.querySelector('#saveHTML');
+var downloadMD = document.querySelector('#saveMD');
+var saveAs = function (content, filename) {
+    var downLink = document.createElement('a');
+    downLink.download = filename;
+    downLink.style.display = 'none';
+    // Convert contents into Blob
+    var blob = new Blob([content]);
+    downLink.href = URL.createObjectURL(blob);
+    // Trigger click
+    document.body.appendChild(downLink);
+    downLink.click();
+    // Remove after click
+    document.body.removeChild(downLink);
+};
+if ('download' in document.createElement('a')) {
+	// Save as HTML file
+	downloadHTML.addEventListener('click', function () {
+		saveAs(input.value, 'index.html');
+	});
+} else {
+	downloadHTML.onclick = function () {
+		alert('Save file failed, you need to update your browser!');	
+	};
+}
+if ('download' in document.createElement('a')) {
+	// Save as HTML file
+	downloadMD.addEventListener('click', function () {
+		saveAs(document.querySelector('#output').value, 'markdown.md');
+	});
+} else {
+	downloadMD.onclick = function () {
+		alert('Save file failed, you need to update your browser!');	
+	};
+}
+</script>
+<!-- ↑↑↑ SaveAs.js ↑↑↑ -->
+
+<!-- ↓↓↓ Append HTML at caret ↓↓↓ -->
+<textarea id="mdjs" style="display:none"><script src="md.js"></script></textarea>
+<script>
+var getMdjs = document.getElementById("mdjs").innerHTML; // Get md.js for append
+function pasteHtmlAtCaret(html) {
+    var sel, range;
+    if (window.getSelection) {
+        // IE9 and non-IE
+        sel = window.getSelection();
+        if (sel.getRangeAt && sel.rangeCount) {
+            range = sel.getRangeAt(0);
+            range.deleteContents();
+            // Range.createContextualFragment() would be useful here but is
+            // non-standard and not supported in all browsers (IE9, for one)
+            var el = document.createElement("div");
+            el.innerHTML = html;
+            var frag = document.createDocumentFragment(), node, lastNode;
+            while ( (node = el.firstChild) ) {
+                lastNode = frag.appendChild(node);
+            }
+            range.insertNode(frag);            
+            // Preserve the selection
+            if (lastNode) {
+                range = range.cloneRange();
+                range.setStartAfter(lastNode);
+                range.collapse(true);
+                sel.removeAllRanges();
+                sel.addRange(range);
+            }
+        }
+    } else if (document.selection && document.selection.type != "Control") {
+        // IE < 9
+        document.selection.createRange().pasteHTML(html);
+    }
+}
+</script>
+<!-- ↑↑↑ Append HTML at caret ↑↑↑ -->
+
+</body>
+</html>
