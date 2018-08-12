@@ -6,7 +6,7 @@ the theme and assets as needed.
 
 Each page is written in markdown with a single `<script>` tag that includes md.js. Once you have created your pages then simply upload the system to your website and enjoy.
 
-**md** includes an enhanced [Online Markdown Editor](https://hing.me/md/editor/) you can use to write your posts using a live preview of the rendered markdown. It uses `localStorage` to persist your writings even if you lose power.
+**md** includes an enhanced [Online Markdown Editor](https://hing.me/md/editor.html) you can use to write your posts using a live preview of the rendered markdown. It uses `localStorage` to persist your writings even if you lose power.
 
 ## [Visit the Demo](https://hing.me/md/)
 
